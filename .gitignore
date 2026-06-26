@@ -1,0 +1,57 @@
+# ───── Dependencies ─────
+node_modules/
+.pnpm-store/
+.npm/
+.yarn/
+
+# ───── Build output ─────
+dist/
+build/
+*.tsbuildinfo
+
+# ───── Test / coverage ─────
+coverage/
+*.lcov
+.nyc_output/
+
+# ───── Env files (NEVER commit secrets) ─────
+.env
+.env.*
+!.env.example
+
+# ───── Logs ─────
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ───── Prisma generated client ─────
+# generated client lives inside node_modules/@prisma/client by default,
+# but uncomment below if you change the output path:
+# prisma/generated/
+
+# ───── IDE / Editor ─────
+.vscode/
+!.vscode/settings.json
+!.vscode/extensions.json
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# ───── TS junk that shouldn't be in src ─────
+src/**/*.d.ts
+src/**/*.js
+src/**/*.js.map
+!src/**/*.config.js
+
+# ───── Misc ─────
+*.pid
+*.seed
+*.tgz
+.cache/
+tmp/
+temp/

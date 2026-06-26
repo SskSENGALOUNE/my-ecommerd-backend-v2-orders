@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api                        # ชื่อ app
+  labels:
+    app: api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: api
+  template:
+    metadata:
+      labels:
+        app: api                   # → service.selector
+    spec:
+      containers:
+      - name: api
+        image: test:dev
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 3000       # → service.targetPort
+        
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+

@@ -1,0 +1,262 @@
+pipeline {
+  agent any
+
+  options {
+    timeout(time: 20, unit: 'MINUTES')
+    disableConcurrentBuilds()
+  }
+
+    environment {
+        DOCKER_USERNAME = "${env.DOCKER_USERNAME}"
+        DOCKER_PASSWORD = "${env.DOCKER_PASSWORD}"
+        VAULT_ADDR = "${env.VAULT_ADDR}"
+        VAULT_TOKEN = "${env.VAULT_TOKEN}"
+        GITLAB_TOKEN = "${env.GITLAB_TOKEN}"   // copy from global env
+           // copy from global env
+    }
+
+  parameters {
+    string(name: 'IMAGE',           defaultValue: 'iquri/service-name', description: 'namespace/repo (e.g. iquri/service-name)')
+    string(name: 'DOCKERFILE',      defaultValue: 'Dockerfile',               description: 'path to Dockerfile from repo root')
+    string(name: 'CONTEXT',         defaultValue: '.',                        description: 'build context directory')
+    booleanParam(name: 'TAG_LATEST', defaultValue: true,                      description: 'also tag & push :latest when TAG != latest')
+    string(name: 'STAGE_SOURCE',      defaultValue: 'gitlab',               description: 'path to Dockerfile from repo root')
+    string(name:'DOCKER_USERNAME', defaultValue: "${env.DOCKER_USERNAME}", description: 'Docker registry username (if not using global env)')
+    string(name:'DOCKER_PASSWORD', defaultValue: "${env.DOCKER_PASSWORD}", description: 'Docker registry password or access token (if not using global env)')
+    string(name:'VAULT_ADDR', defaultValue: "${env.VAULT_ADDR}", description: 'Vault server address (if not using global env)')
+    string(name:'VAULT_TOKEN', defaultValue: "${env.VAULT_TOKEN}", description: 'Vault access token (if not using global env)')
+    string(name:'GITLAB_TOKEN', defaultValue: "${env.GITLAB_TOKEN}", description: 'GitLab access token (if not using global env)')
+    string(name: 'GITLAB_STAGES_REPO', defaultValue: 'https://gitlab.iquritech.com/api/v4/projects/devops%2Fjenkins/repository/files/stages%2Fcheckout.groovy/raw?ref=main', description: 'GitLab repository URL for pipeline stages (when using gitlab source)')
+    choice(name: 'DEPLOYMENT_METHOD', choices: ['ssh', 'gitops', 'webhook'], description: 'Deployment method: ssh (traditional), gitops (ArgoCD), or webhook (API)')
+  }
+
+  stages {
+    stage('Initialize Stage Loader') {
+      steps {
+        script {
+          // Load the stage loader helper
+          def stageLoader = load 'jenkins/helpers/stageLoader.groovy'
+          env.STAGE_LOADER_LOADED = 'true'
+          
+          // Determine which repository URL to use based on source
+          def repoUrl = ''
+          repoUrl = params.GITLAB_STAGES_REPO
+          env.CURRENT_REPO_URL = repoUrl
+          echo "✅ Stage loader initialized for source: ${params.STAGE_SOURCE}"
+          if (repoUrl) {
+            echo "📍 Repository URL: ${repoUrl}"
+          }
+        }
+      }
+    }
+    
+    stage('Checkout') {
+      steps {
+          script {
+            echo "STAGE_SOURCE=${params.STAGE_SOURCE}"
+            echo "GITLAB_STAGES_REPO=${params.GITLAB_STAGES_REPO}"
+
+            def stageLoader = load 'jenkins/helpers/stageLoader.groovy'
+
+            if (stageLoader == null) {
+              error 'stageLoader is null (load returned null)'
+            }
+
+            echo "stageLoader class: ${stageLoader.getClass().name}"
+
+            def source = (params.STAGE_SOURCE ?: 'local').toLowerCase()
+            def repoUrl = source == 'gitlab' ? params.GITLAB_STAGES_REPO : params.GITHUB_STAGES_REPO
+
+            def checkoutStage = stageLoader.loadStage('checkout', source, repoUrl, 'stages', params.GITLAB_TOKEN)
+            echo "checkoutStage (raw): ${checkoutStage}"
+
+            if (checkoutStage == null) {
+              error "loadStage returned null (source=${source}, repoUrl=${repoUrl})"
+            }
+
+            echo "checkoutStage class: ${checkoutStage.getClass().name}"
+
+            checkoutStage.call()
+          }
+      }
+    }
+
+    stage('SonarQube Analysis') {
+      steps {
+          script 
+          {
+            def stageLoader = load 'jenkins/helpers/stageLoader.groovy'
+            def repoUrl = params.STAGE_SOURCE == 'gitlab' ? params.GITLAB_STAGES_REPO : params.GITHUB_STAGES_REPO
+            def sonarqubeStage = stageLoader.loadStage('sonarqube', params.STAGE_SOURCE, repoUrl,'stages',params.GITLAB_TOKEN)
+            sonarqubeStage.call()
+          }
+      }
+    }
+
+    stage('Docker sanity') {
+      steps {
+        script {
+          def stageLoader = load 'jenkins/helpers/stageLoader.groovy'
+          def repoUrl = params.STAGE_SOURCE == 'gitlab' ? params.GITLAB_STAGES_REPO : params.GITHUB_STAGES_REPO
+          def dockerSanityStage = stageLoader.loadStage('dockerSanity', params.STAGE_SOURCE, repoUrl,'stages',params.GITLAB_TOKEN)
+          dockerSanityStage.call()
+        }
+      }
+    }
+
+    stage('Pre-build cleanup') {
+      steps {
+        script {
+          def stageLoader = load 'jenkins/helpers/stageLoader.groovy'
+          def repoUrl = params.STAGE_SOURCE == 'gitlab' ? params.GITLAB_STAGES_REPO : params.GITHUB_STAGES_REPO
+          def preBuildCleanupStage = stageLoader.loadStage('preBuildCleanup', params.STAGE_SOURCE, repoUrl,'stages',params.GITLAB_TOKEN)
+          preBuildCleanupStage.call(params)
+        }
+      }
+    }
+
+    stage('Docker login') {
+      steps {
+        script {
+          def stageLoader = load 'jenkins/helpers/stageLoader.groovy'
+          def repoUrl = params.STAGE_SOURCE == 'gitlab' ? params.GITLAB_STAGES_REPO : params.GITHUB_STAGES_REPO
+          def dockerLoginStage = stageLoader.loadStage('dockerLogin', params.STAGE_SOURCE, repoUrl,'stages',params.GITLAB_TOKEN)
+
+          dockerLoginStage.call(env)
+        }
+      }
+    }
+
+    stage('Build image') {
+      steps {
+        script {
+          def stageLoader = load 'jenkins/helpers/stageLoader.groovy'
+          def repoUrl = params.STAGE_SOURCE == 'gitlab' ? params.GITLAB_STAGES_REPO : params.GITHUB_STAGES_REPO
+          def buildImageStage = stageLoader.loadStage('buildImage', params.STAGE_SOURCE, repoUrl,'stages',params.GITLAB_TOKEN)
+          // params.TAG = "${TAG}"
+          buildImageStage.call(params)
+        }
+      }
+    }
+
+    stage('Push image') {
+      steps {
+        script {
+          def stageLoader = load 'jenkins/helpers/stageLoader.groovy'
+          def repoUrl = params.STAGE_SOURCE == 'gitlab' ? params.GITLAB_STAGES_REPO : params.GITHUB_STAGES_REPO
+          def pushImageStage = stageLoader.loadStage('pushImage', params.STAGE_SOURCE, repoUrl,'stages',params.GITLAB_TOKEN)
+          pushImageStage.call(params)
+        }
+      }
+    }
+
+    stage('Docker logout') {
+      steps {
+        script {
+          def stageLoader = load 'jenkins/helpers/stageLoader.groovy'
+          def repoUrl = params.STAGE_SOURCE == 'gitlab' ? params.GITLAB_STAGES_REPO : params.GITHUB_STAGES_REPO
+          def dockerLogoutStage = stageLoader.loadStage('dockerLogout', params.STAGE_SOURCE, repoUrl,'stages',params.GITLAB_TOKEN)
+          dockerLogoutStage.call()
+        }
+      }
+    }
+
+    stage('Deploy') {
+      steps {
+        script {
+          def stageLoader = load 'jenkins/helpers/stageLoader.groovy'
+          def repoUrl = params.STAGE_SOURCE == 'gitlab' ? params.GITLAB_STAGES_REPO : params.GITHUB_STAGES_REPO
+          def deployStage = stageLoader.loadStage('deploy', params.STAGE_SOURCE, repoUrl,'deploy',params.GITLAB_TOKEN)
+            
+          deployStage.call("file shell only name file", params)
+        }
+      }
+    }
+
+    stage('integration Test') {
+      steps {
+          script 
+          {
+            def stageLoader = load 'jenkins/helpers/stageLoader.groovy'
+            def repoUrl = params.STAGE_SOURCE == 'gitlab' ? params.GITLAB_STAGES_REPO : params.GITHUB_STAGES_REPO
+            def integrationTestStage = stageLoader.loadStage('integrationTest', params.STAGE_SOURCE, repoUrl,'stages',params.GITLAB_TOKEN)
+            integrationTestStage.call()
+          }
+      }
+    }
+  }
+
+  post {
+    always {
+      sh '''#!/bin/bash
+      echo "=== Post-build cleanup for containerized Jenkins ==="
+      
+      # Safe cleanup that won't affect the Jenkins container itself
+      echo "Cleaning up build artifacts..."
+      
+      # Remove any containers created during this build (with label if possible)
+      docker ps -a --filter "label=build=${BUILD_NUMBER}" -q | xargs -r docker rm -f || true
+      
+      # Clean up dangling images only
+      docker image prune -f || true
+      
+      # Clean old build cache (keep recent for performance)
+      docker builder prune --filter "until=1h" -f || true
+      
+      echo "Safe post-build cleanup completed"
+      ''' 
+    }
+    success {
+      withCredentials([string(credentialsId: 'DOCKER_TAG', variable: 'TAG')]) {
+            script {
+              def msg = "Pushed: ${params.IMAGE}:${TAG}"
+              if (params.TAG_LATEST && "${TAG}" != 'latest') {
+                msg += " and :latest"
+              }
+              echo msg
+            }
+      }
+    }
+    failure {
+      sh '''#!/bin/bash
+      echo "=== Build failed - containerized Jenkins cleanup ==="
+      
+      # Collect diagnostic information for containerized environment
+      echo "=== Diagnostic Information ==="
+      
+      echo "Jenkins container environment:"
+      env | grep -E "(DOCKER|JENKINS)" || true
+      
+      echo "Docker daemon info:"
+      docker info 2>&1 | head -20 || true
+      
+      echo "Available disk space in container:"
+      df -h / || true
+      
+      echo "Docker system usage:"
+      docker system df || true
+      
+      echo "Recent containers:"
+      docker ps -a | head -10 || true
+      
+      echo "Docker socket permissions:"
+      ls -la /var/run/docker.sock 2>/dev/null || echo "Docker socket not accessible"
+      
+      # Safe cleanup for failed builds
+      echo "Performing failure cleanup..."
+      
+      # Remove failed build containers
+      docker ps -a --filter "status=exited" --filter "status=dead" -q | head -10 | xargs -r docker rm -f || true
+      
+      # Clean up dangling images
+      docker image prune -f || true
+      
+      # Clean build cache
+      docker builder prune -f || true
+      
+      echo "Failure cleanup completed"
+      '''
+      echo "Build/push failed — check the failing stage logs and diagnostic information above."
+    }
+  }
+}
