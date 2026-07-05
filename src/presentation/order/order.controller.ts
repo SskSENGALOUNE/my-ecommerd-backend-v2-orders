@@ -72,21 +72,28 @@ export class OrderController {
   }
 
   @Get()
-  @Roles(UserRole.ADMIN, UserRole.SUPER_ADMIN)
   @ApiOperation({
-    summary: "List orders (admin; paginated, optional customer filter)",
+    summary:
+      "List orders. Admins see all (optional customerId filter); customers see only their own.",
   })
   @ApiResponse({ status: 200, description: "Paginated list of orders." })
   async findAll(
     @Query() query: OrderQueryDto,
+    @CurrentUser("sub") userId: string,
+    @CurrentUser("role") role: UserRole,
   ): Promise<PaginatedResponse<OrderResponseDto>> {
+    const isAdmin =
+      role === UserRole.ADMIN || role === UserRole.SUPER_ADMIN;
+    // Non-admins are always scoped to their own orders, regardless of any
+    // customerId they try to pass in the query.
+    const customerId = isAdmin ? query.customerId : userId;
     const result = await this.queryBus.execute(
       new GetAllOrdersQuery(
         query.page,
         query.limit,
         query.sortBy,
         query.sortOrder,
-        query.customerId,
+        customerId,
       ),
     );
     return PaginatedResponse.build(
@@ -98,12 +105,19 @@ export class OrderController {
   }
 
   @Get(":id")
-  @ApiOperation({ summary: "Get an order by ID" })
+  @ApiOperation({ summary: "Get an order by ID (owner or admin only)" })
   @ApiParam({ name: "id", description: "Order UUID", type: "string" })
   @ApiResponse({ status: 200, type: OrderResponseDto })
+  @ApiResponse({ status: 403, description: "Not your order." })
   @ApiResponse({ status: 404, description: "Order not found." })
-  async findOne(@Param("id") id: string): Promise<OrderResponseDto> {
-    const result = await this.queryBus.execute(new GetOrderByIdQuery(id));
+  async findOne(
+    @Param("id") id: string,
+    @CurrentUser("sub") userId: string,
+    @CurrentUser("role") role: UserRole,
+  ): Promise<OrderResponseDto> {
+    const result = await this.queryBus.execute(
+      new GetOrderByIdQuery(id, userId, role),
+    );
     return OrderResponseDto.fromDomain(result);
   }
 
@@ -140,9 +154,10 @@ export class OrderController {
   async cancel(
     @Param("id") id: string,
     @CurrentUser("sub") userId: string,
+    @CurrentUser("role") role: UserRole,
   ): Promise<OrderResponseDto> {
     const cancelled = await this.commandBus.execute(
-      new CancelOrderCommand(id, userId),
+      new CancelOrderCommand(id, userId, role),
     );
     return OrderResponseDto.fromDomain(cancelled);
   }

@@ -10,6 +10,7 @@ import {
   ConflictDomainException,
   NotFoundDomainException,
 } from "../../../domain/exceptions";
+import { assertOwnerOrAdmin } from "../../common/authorization";
 
 @CommandHandler(CreatePaymentCommand)
 export class CreatePaymentHandler implements ICommandHandler<CreatePaymentCommand> {
@@ -25,6 +26,12 @@ export class CreatePaymentHandler implements ICommandHandler<CreatePaymentComman
     if (!order) {
       throw NotFoundDomainException.forResource("Order", command.orderId);
     }
+
+    assertOwnerOrAdmin(
+      order.customerId,
+      command.requesterId,
+      command.requesterRole,
+    );
 
     const existing = await this.paymentRepository.findByOrderId(
       command.orderId,

@@ -55,23 +55,28 @@ export class PaymentController {
   async create(
     @Param("orderId") orderId: string,
     @Body() dto: CreatePaymentDto,
+    @CurrentUser("sub") userId: string,
+    @CurrentUser("role") role: UserRole,
   ): Promise<PaymentResponseDto> {
     const payment = await this.commandBus.execute(
-      new CreatePaymentCommand(orderId, dto.method),
+      new CreatePaymentCommand(orderId, dto.method, userId, role),
     );
     return PaymentResponseDto.fromDomain(payment);
   }
 
   @Get()
-  @ApiOperation({ summary: "Get the payment for an order" })
+  @ApiOperation({ summary: "Get the payment for an order (owner or admin only)" })
   @ApiParam({ name: "orderId", type: "string" })
   @ApiResponse({ status: 200, type: PaymentResponseDto })
+  @ApiResponse({ status: 403, description: "Not your order." })
   @ApiResponse({ status: 404, description: "Payment not found." })
   async findByOrder(
     @Param("orderId") orderId: string,
+    @CurrentUser("sub") userId: string,
+    @CurrentUser("role") role: UserRole,
   ): Promise<PaymentResponseDto> {
     const payment = await this.queryBus.execute(
-      new GetPaymentByOrderQuery(orderId),
+      new GetPaymentByOrderQuery(orderId, userId, role),
     );
     return PaymentResponseDto.fromDomain(payment);
   }

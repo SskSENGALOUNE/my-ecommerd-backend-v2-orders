@@ -5,6 +5,7 @@ import type { IOrderRepository } from "../../../domain/order/order.repository";
 import { ORDER_REPOSITORY } from "../../../domain/order/order.repository";
 import { Order } from "../../../domain/order/order.entity";
 import { NotFoundDomainException } from "../../../domain/exceptions";
+import { assertOwnerOrAdmin } from "../../common/authorization";
 
 @CommandHandler(CancelOrderCommand)
 export class CancelOrderHandler implements ICommandHandler<CancelOrderCommand> {
@@ -19,6 +20,8 @@ export class CancelOrderHandler implements ICommandHandler<CancelOrderCommand> {
     if (!order) {
       throw NotFoundDomainException.forResource("Order", command.id);
     }
+
+    assertOwnerOrAdmin(order.customerId, command.updatedBy, command.requesterRole);
 
     order.cancel(command.updatedBy);
 
