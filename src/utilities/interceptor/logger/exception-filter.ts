@@ -1,7 +1,13 @@
-import { ExceptionFilter, Catch, ArgumentsHost, HttpException, HttpStatus } from '@nestjs/common';
-import { Response } from 'express';
-import { iquriLogger } from './logger';
-import { TracedRequest, HttpExceptionResponse } from './interfaces';
+import {
+  ExceptionFilter,
+  Catch,
+  ArgumentsHost,
+  HttpException,
+  HttpStatus,
+} from "@nestjs/common";
+import { Response } from "express";
+import { iquriLogger } from "./logger";
+import { TracedRequest, HttpExceptionResponse } from "./interfaces";
 
 @Catch()
 export class IquriExceptionFilter implements ExceptionFilter {
@@ -11,17 +17,18 @@ export class IquriExceptionFilter implements ExceptionFilter {
     const response = ctx.getResponse<Response>();
 
     // Get traceId and serviceName from request (attached by Interceptor)
-    const traceId = request.traceId || (request.headers['x-trace-id'] as string) || 'unknown';
-    const serviceName = request.serviceName || 'iquri-unknown-service';
+    const traceId =
+      request.traceId || request.headers["x-trace-id"] || "unknown";
+    const serviceName = request.serviceName || "iquri-unknown-service";
 
     let status = HttpStatus.INTERNAL_SERVER_ERROR;
-    let message = 'Internal server error';
+    let message = "Internal server error";
     let stack: string | undefined;
 
     if (exception instanceof HttpException) {
       status = exception.getStatus();
       const exceptionResponse = exception.getResponse();
-      if (typeof exceptionResponse === 'string') {
+      if (typeof exceptionResponse === "string") {
         message = exceptionResponse;
       } else {
         const responseObj = exceptionResponse as HttpExceptionResponse;
@@ -41,7 +48,7 @@ export class IquriExceptionFilter implements ExceptionFilter {
       method: request.method,
       url: request.originalUrl || request.url,
       stack,
-      context: 'ExceptionFilter',
+      context: "ExceptionFilter",
     });
 
     // Send response

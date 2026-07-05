@@ -1,4 +1,4 @@
-import { DomainErrorCode, DomainException } from './domain.exception';
+import { DomainErrorCode, DomainException } from "./domain.exception";
 
 export class UnauthorizedDomainException extends DomainException {
   readonly code = DomainErrorCode.UNAUTHORIZED;

@@ -1,13 +1,13 @@
-import { Injectable } from '@nestjs/common';
-import { Prisma } from '@prisma/client';
-import { PrismaService } from '../prisma.service';
+import { Injectable } from "@nestjs/common";
+import { Prisma } from "@prisma/client";
+import { PrismaService } from "../prisma.service";
 import {
   IOrderRepository,
   OrderQueryParams,
   PaginatedResult,
-} from '../../../domain/order/order.repository';
-import { Order } from '../../../domain/order/order.entity';
-import { OrderMapper } from '../mappers/order.mapper';
+} from "../../../domain/order/order.repository";
+import { Order } from "../../../domain/order/order.entity";
+import { OrderMapper } from "../mappers/order.mapper";
 
 @Injectable()
 export class OrderRepositoryImpl implements IOrderRepository {
@@ -44,7 +44,7 @@ export class OrderRepositoryImpl implements IOrderRepository {
       ? { customerId: params.customerId }
       : {};
     const orderBy = {
-      [params.sortBy ?? 'createdAt']: params.sortOrder ?? 'desc',
+      [params.sortBy ?? "createdAt"]: params.sortOrder ?? "desc",
     };
 
     const [models, total] = await this.prisma.$transaction([

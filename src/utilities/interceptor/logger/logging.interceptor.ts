@@ -5,16 +5,16 @@ import {
   CallHandler,
   HttpException,
   HttpStatus,
-} from '@nestjs/common';
-import { Observable, throwError } from 'rxjs';
-import { tap, catchError } from 'rxjs/operators';
+} from "@nestjs/common";
+import { Observable, throwError } from "rxjs";
+import { tap, catchError } from "rxjs/operators";
 // import { v4 as uuidv4 } from 'uuid';
-import { iquriLogger, enableConsoleHijacking } from './logger';
-import { als } from './utils/als';
-import type { LoggerOptions } from './interfaces';
-import { TracedRequest, RequestContext } from './interfaces';
-import { Response } from 'express';
-const { v4: uuidv4 } = require('uuid'); 
+import { iquriLogger, enableConsoleHijacking } from "./logger";
+import { als } from "./utils/als";
+import type { LoggerOptions } from "./interfaces";
+import { TracedRequest, RequestContext } from "./interfaces";
+import { Response } from "express";
+const { v4: uuidv4 } = require("uuid");
 
 @Injectable()
 export class LoggingInterceptor implements NestInterceptor {
@@ -24,8 +24,8 @@ export class LoggingInterceptor implements NestInterceptor {
     this.options = {
       serviceName:
         options.serviceName ||
-        process.env['SERVICE_NAME'] ||
-        'iquri-unknown-service',
+        process.env["SERVICE_NAME"] ||
+        "iquri-unknown-service",
       enableAccessLog:
         options.enableAccessLog !== undefined ? options.enableAccessLog : true,
       enableConsoleHijacking:
@@ -33,7 +33,7 @@ export class LoggingInterceptor implements NestInterceptor {
           ? options.enableConsoleHijacking
           : true,
       skipPaths: options.skipPaths || [],
-      logLevel: options.logLevel || 'info',
+      logLevel: options.logLevel || "info",
     };
 
     // Set log level dynamically
@@ -61,11 +61,11 @@ export class LoggingInterceptor implements NestInterceptor {
     const startTime = Date.now();
 
     // Trace ID Management
-    const traceId = (req.headers['x-trace-id'] as string) || uuidv4();
-    req.headers['x-trace-id'] = traceId;
+    const traceId = (req.headers["x-trace-id"] as string) || uuidv4();
+    req.headers["x-trace-id"] = traceId;
 
     // Set Trace ID in Response Header for client debugging
-    res.setHeader('x-trace-id', traceId);
+    res.setHeader("x-trace-id", traceId);
 
     // Attach traceId to request for use by ExceptionFilter
     req.traceId = traceId;
@@ -73,8 +73,8 @@ export class LoggingInterceptor implements NestInterceptor {
 
     return new Observable((observer) => {
       const store = new Map<keyof RequestContext, string>();
-      store.set('traceId', traceId);
-      store.set('serviceName', this.options.serviceName);
+      store.set("traceId", traceId);
+      store.set("serviceName", this.options.serviceName);
 
       als.run(store, () => {
         next
@@ -83,8 +83,8 @@ export class LoggingInterceptor implements NestInterceptor {
             tap(() => {
               if (this.options.enableAccessLog) {
                 const statusCode = res.statusCode || 200;
-                const ip = req.ip || req.socket?.remoteAddress || '';
-                const userAgent = req.headers['user-agent'] || '';
+                const ip = req.ip || req.socket?.remoteAddress || "";
+                const userAgent = req.headers["user-agent"] || "";
                 const duration = Date.now() - startTime;
 
                 iquriLogger.info({
@@ -115,7 +115,7 @@ export class LoggingInterceptor implements NestInterceptor {
                 durationMs: duration,
                 method,
                 url,
-                ip: req.ip || req.socket?.remoteAddress || '',
+                ip: req.ip || req.socket?.remoteAddress || "",
                 error: err ? err.message : undefined,
                 serviceName: this.options.serviceName,
               };

@@ -1,6 +1,6 @@
-import * as winston from 'winston';
-import { getTraceId, getServiceName } from './utils/als';
-import { SerializedError, LogObject } from './interfaces';
+import * as winston from "winston";
+import { getTraceId, getServiceName } from "./utils/als";
+import { SerializedError, LogObject } from "./interfaces";
 
 // Winston log info type
 interface WinstonLogInfo {
@@ -28,17 +28,25 @@ let isHijackingEnabled = false;
 
 // Custom JSON Format with ordered keys
 const logFormat = winston.format.combine(
-  winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss.SSS' }),
+  winston.format.timestamp({ format: "YYYY-MM-DD HH:mm:ss.SSS" }),
   winston.format.errors({ stack: true }),
   winston.format.printf((info) => {
     const logInfo = info as WinstonLogInfo;
-    const { timestamp, level, service, traceId, message, context, serviceName, ...others } =
-      logInfo;
+    const {
+      timestamp,
+      level,
+      service,
+      traceId,
+      message,
+      context,
+      serviceName,
+      ...others
+    } = logInfo;
 
     const orderedLog = {
       timestamp,
       level,
-      service: serviceName || service || 'iquri-unknown-service',
+      service: serviceName || service || "iquri-unknown-service",
       traceId,
       context,
       message,
@@ -51,9 +59,11 @@ const logFormat = winston.format.combine(
 
 // Create Logger Instance
 export const iquriLogger = winston.createLogger({
-  level: process.env['LOG_LEVEL'] || 'info',
+  level: process.env["LOG_LEVEL"] || "info",
   format: logFormat,
-  defaultMeta: { service: process.env['SERVICE_NAME'] || 'iquri-unknown-service' },
+  defaultMeta: {
+    service: process.env["SERVICE_NAME"] || "iquri-unknown-service",
+  },
   transports: [new winston.transports.Console()],
 });
 
@@ -72,7 +82,11 @@ const serializeArg = (arg: unknown): unknown => {
   return arg;
 };
 
-const enhancedLog = (level: string, message: unknown, ...args: unknown[]): void => {
+const enhancedLog = (
+  level: string,
+  message: unknown,
+  ...args: unknown[]
+): void => {
   const traceId = getTraceId();
   const serviceName = getServiceName();
 
@@ -89,7 +103,7 @@ const enhancedLog = (level: string, message: unknown, ...args: unknown[]): void 
       error: serializeArg(message) as SerializedError,
       ...context,
     };
-  } else if (typeof message === 'object' && message !== null) {
+  } else if (typeof message === "object" && message !== null) {
     logObject = { ...(message as Record<string, unknown>), ...context };
   } else {
     logObject = { message: String(message), ...context };
@@ -140,15 +154,15 @@ export function enableConsoleHijacking(): void {
 
   // Override console methods
   console.log = (message?: unknown, ...args: unknown[]): void =>
-    enhancedLog('info', message, ...args);
+    enhancedLog("info", message, ...args);
   console.info = (message?: unknown, ...args: unknown[]): void =>
-    enhancedLog('info', message, ...args);
+    enhancedLog("info", message, ...args);
   console.warn = (message?: unknown, ...args: unknown[]): void =>
-    enhancedLog('warn', message, ...args);
+    enhancedLog("warn", message, ...args);
   console.error = (message?: unknown, ...args: unknown[]): void =>
-    enhancedLog('error', message, ...args);
+    enhancedLog("error", message, ...args);
   console.debug = (message?: unknown, ...args: unknown[]): void =>
-    enhancedLog('debug', message, ...args);
+    enhancedLog("debug", message, ...args);
 
   isHijackingEnabled = true;
 }

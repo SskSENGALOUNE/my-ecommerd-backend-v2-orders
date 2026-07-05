@@ -101,3 +101,21 @@ model Payment {
 
   @@map("payments")
 }
+
+// ───── Payment Channel (admin-managed bank + QR) ─────
+// Admin registers each bank and pastes its QR image. Customers pay manually to
+// one of these and attach a slip; an admin verifies it afterwards (no gateway).
+model PaymentChannel {
+  id            String  @id @default(uuid()) @db.Uuid
+  bankName      String  @map("bank_name")
+  accountName   String? @map("account_name")
+  accountNumber String? @map("account_number")
+  qrImageUrl    String  @map("qr_image_url")
+  isActive      Boolean @default(true) @map("is_active")
+  sortOrder     Int     @default(0) @map("sort_order")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("payment_channels")
+}

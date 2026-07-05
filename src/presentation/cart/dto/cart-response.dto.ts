@@ -1,12 +1,12 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { Cart } from '../../../domain/cart/cart.entity';
-import { CartItem } from '../../../domain/cart/cart-item.entity';
+import { ApiProperty } from "@nestjs/swagger";
+import { Cart } from "../../../domain/cart/cart.entity";
+import { CartItem } from "../../../domain/cart/cart-item.entity";
 
 export class CartItemResponseDto {
-  @ApiProperty({ example: '123e4567-e89b-12d3-a456-426614174000' })
+  @ApiProperty({ example: "123e4567-e89b-12d3-a456-426614174000" })
   id: string;
 
-  @ApiProperty({ example: 'prod-123' })
+  @ApiProperty({ example: "prod-123" })
   productId: string;
 
   @ApiProperty({ example: 29.99 })
@@ -30,16 +30,16 @@ export class CartItemResponseDto {
 }
 
 export class CartResponseDto {
-  @ApiProperty({ example: '123e4567-e89b-12d3-a456-426614174000' })
+  @ApiProperty({ example: "123e4567-e89b-12d3-a456-426614174000" })
   id: string;
 
-  @ApiProperty({ example: 'cust-123' })
+  @ApiProperty({ example: "cust-123" })
   customerId: string;
 
   @ApiProperty({ type: [CartItemResponseDto] })
   items: CartItemResponseDto[];
 
-  @ApiProperty({ example: 2, description: 'Total number of units in the cart' })
+  @ApiProperty({ example: 2, description: "Total number of units in the cart" })
   totalItems: number;
 
   @ApiProperty({ example: 59.98 })

@@ -1,6 +1,6 @@
-import { Injectable } from '@nestjs/common';
-import { join } from 'path';
-import { readFileSync } from 'fs';
+import { Injectable } from "@nestjs/common";
+import { join } from "path";
+import { readFileSync } from "fs";
 
 @Injectable()
 export class HealthService {
@@ -11,17 +11,17 @@ export class HealthService {
   }
 
   public getPackageVersion(): string {
-    const defaultVersion = '1.0.0';
+    const defaultVersion = "1.0.0";
     try {
       const packageJson = JSON.parse(
-        readFileSync(join(process.cwd(), 'package.json'), 'utf-8'),
+        readFileSync(join(process.cwd(), "package.json"), "utf-8"),
       ) as Record<string, string>;
       return packageJson.version || defaultVersion;
     } catch (error) {
       const errorMessage =
-        error instanceof Error ? error.message : 'Unknown error';
+        error instanceof Error ? error.message : "Unknown error";
       console.warn(
-        'Could not read package.json, using default version:',
+        "Could not read package.json, using default version:",
         errorMessage,
       );
       return defaultVersion;

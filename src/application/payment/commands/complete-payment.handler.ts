@@ -1,18 +1,16 @@
-import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { Inject } from '@nestjs/common';
-import { CompletePaymentCommand } from './complete-payment.command';
-import type { IPaymentRepository } from '../../../domain/payment/payment.repository';
-import { PAYMENT_REPOSITORY } from '../../../domain/payment/payment.repository';
-import type { IOrderRepository } from '../../../domain/order/order.repository';
-import { ORDER_REPOSITORY } from '../../../domain/order/order.repository';
-import { Payment } from '../../../domain/payment/payment.entity';
-import { OrderStatus } from '../../../domain/order/order-status.enum';
-import { NotFoundDomainException } from '../../../domain/exceptions';
+import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
+import { Inject } from "@nestjs/common";
+import { CompletePaymentCommand } from "./complete-payment.command";
+import type { IPaymentRepository } from "../../../domain/payment/payment.repository";
+import { PAYMENT_REPOSITORY } from "../../../domain/payment/payment.repository";
+import type { IOrderRepository } from "../../../domain/order/order.repository";
+import { ORDER_REPOSITORY } from "../../../domain/order/order.repository";
+import { Payment } from "../../../domain/payment/payment.entity";
+import { OrderStatus } from "../../../domain/order/order-status.enum";
+import { NotFoundDomainException } from "../../../domain/exceptions";
 
 @CommandHandler(CompletePaymentCommand)
-export class CompletePaymentHandler
-  implements ICommandHandler<CompletePaymentCommand>
-{
+export class CompletePaymentHandler implements ICommandHandler<CompletePaymentCommand> {
   constructor(
     @Inject(PAYMENT_REPOSITORY)
     private readonly paymentRepository: IPaymentRepository,
@@ -21,12 +19,10 @@ export class CompletePaymentHandler
   ) {}
 
   async execute(command: CompletePaymentCommand): Promise<Payment> {
-    const payment = await this.paymentRepository.findByOrderId(
-      command.orderId,
-    );
+    const payment = await this.paymentRepository.findByOrderId(command.orderId);
     if (!payment) {
       throw NotFoundDomainException.forResource(
-        'Payment for order',
+        "Payment for order",
         command.orderId,
       );
     }

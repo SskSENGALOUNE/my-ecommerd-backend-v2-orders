@@ -1,6 +1,6 @@
-import { Cart as PrismaCart, CartItem as PrismaCartItem } from '@prisma/client';
-import { Cart } from '../../../domain/cart/cart.entity';
-import { CartItem } from '../../../domain/cart/cart-item.entity';
+import { Cart as PrismaCart, CartItem as PrismaCartItem } from "@prisma/client";
+import { Cart } from "../../../domain/cart/cart.entity";
+import { CartItem } from "../../../domain/cart/cart-item.entity";
 
 type PrismaCartWithItems = PrismaCart & { items: PrismaCartItem[] };
 

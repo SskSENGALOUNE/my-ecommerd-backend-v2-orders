@@ -1,7 +1,7 @@
-import { Payment as PrismaPayment, Prisma } from '@prisma/client';
-import { Payment } from '../../../domain/payment/payment.entity';
-import { PaymentStatus } from '../../../domain/payment/payment-status.enum';
-import { PaymentMethod } from '../../../domain/payment/payment-method.enum';
+import { Payment as PrismaPayment, Prisma } from "@prisma/client";
+import { Payment } from "../../../domain/payment/payment.entity";
+import { PaymentStatus } from "../../../domain/payment/payment-status.enum";
+import { PaymentMethod } from "../../../domain/payment/payment-method.enum";
 
 /**
  * Translates between the Prisma persistence model and the Payment entity.

@@ -1,4 +1,4 @@
-import { Cart } from './cart.entity';
+import { Cart } from "./cart.entity";
 
 /**
  * Domain port for the Cart aggregate. Implementations persist the cart together
@@ -11,4 +11,4 @@ export interface ICartRepository {
   delete(id: string): Promise<void>;
 }
 
-export const CART_REPOSITORY = Symbol('CART_REPOSITORY');
+export const CART_REPOSITORY = Symbol("CART_REPOSITORY");

@@ -1,8 +1,8 @@
-import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../prisma.service';
-import { IPaymentRepository } from '../../../domain/payment/payment.repository';
-import { Payment } from '../../../domain/payment/payment.entity';
-import { PaymentMapper } from '../mappers/payment.mapper';
+import { Injectable } from "@nestjs/common";
+import { PrismaService } from "../prisma.service";
+import { IPaymentRepository } from "../../../domain/payment/payment.repository";
+import { Payment } from "../../../domain/payment/payment.entity";
+import { PaymentMapper } from "../mappers/payment.mapper";
 
 @Injectable()
 export class PaymentRepositoryImpl implements IPaymentRepository {

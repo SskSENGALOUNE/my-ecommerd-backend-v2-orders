@@ -1,6 +1,6 @@
-import { randomUUID } from 'crypto';
-import { DomainValidationException } from '../exceptions';
-import { CartItem } from './cart-item.entity';
+import { randomUUID } from "crypto";
+import { DomainValidationException } from "../exceptions";
+import { CartItem } from "./cart-item.entity";
 
 export interface CartProps {
   id: string;
@@ -49,7 +49,7 @@ export class Cart {
   /** Create a brand-new empty cart for a customer. */
   static create(input: { customerId: string }): Cart {
     if (!input.customerId?.trim()) {
-      throw new DomainValidationException('Cart requires a customerId');
+      throw new DomainValidationException("Cart requires a customerId");
     }
     const now = new Date();
     return new Cart({

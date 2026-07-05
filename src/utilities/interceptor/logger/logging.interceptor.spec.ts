@@ -1,9 +1,18 @@
-import { ExecutionContext, CallHandler, HttpException, HttpStatus } from '@nestjs/common';
-import { of, throwError } from 'rxjs';
-import { LoggingInterceptor } from './logging.interceptor';
-import { iquriLogger, disableConsoleHijacking, isConsoleHijacked } from './logger';
+import {
+  ExecutionContext,
+  CallHandler,
+  HttpException,
+  HttpStatus,
+} from "@nestjs/common";
+import { of, throwError } from "rxjs";
+import { LoggingInterceptor } from "./logging.interceptor";
+import {
+  iquriLogger,
+  disableConsoleHijacking,
+  isConsoleHijacked,
+} from "./logger";
 
-describe('LoggingInterceptor', () => {
+describe("LoggingInterceptor", () => {
   let interceptor: LoggingInterceptor;
   let mockExecutionContext: Partial<ExecutionContext>;
   let mockCallHandler: Partial<CallHandler>;
@@ -15,15 +24,15 @@ describe('LoggingInterceptor', () => {
     disableConsoleHijacking();
 
     mockRequest = {
-      method: 'GET',
-      originalUrl: '/api/test',
-      url: '/api/test',
-      ip: '127.0.0.1',
+      method: "GET",
+      originalUrl: "/api/test",
+      url: "/api/test",
+      ip: "127.0.0.1",
       headers: {
-        'user-agent': 'test-agent',
+        "user-agent": "test-agent",
       },
       socket: {
-        remoteAddress: '127.0.0.1',
+        remoteAddress: "127.0.0.1",
       },
     };
 
@@ -40,7 +49,7 @@ describe('LoggingInterceptor', () => {
     };
 
     mockCallHandler = {
-      handle: jest.fn().mockReturnValue(of({ data: 'test' })),
+      handle: jest.fn().mockReturnValue(of({ data: "test" })),
     };
   });
 
@@ -48,51 +57,51 @@ describe('LoggingInterceptor', () => {
     disableConsoleHijacking();
   });
 
-  describe('constructor', () => {
-    it('should create with default options', () => {
+  describe("constructor", () => {
+    it("should create with default options", () => {
       interceptor = new LoggingInterceptor();
       expect(interceptor).toBeDefined();
     });
 
-    it('should create with custom serviceName', () => {
+    it("should create with custom serviceName", () => {
       interceptor = new LoggingInterceptor({
-        serviceName: 'custom-service',
+        serviceName: "custom-service",
         enableConsoleHijacking: false,
       });
       expect(interceptor).toBeDefined();
     });
 
-    it('should enable console hijacking by default', () => {
+    it("should enable console hijacking by default", () => {
       interceptor = new LoggingInterceptor();
       expect(isConsoleHijacked()).toBe(true);
       disableConsoleHijacking();
     });
 
-    it('should not enable console hijacking when disabled', () => {
+    it("should not enable console hijacking when disabled", () => {
       interceptor = new LoggingInterceptor({
         enableConsoleHijacking: false,
       });
       expect(isConsoleHijacked()).toBe(false);
     });
 
-    it('should set log level', () => {
+    it("should set log level", () => {
       interceptor = new LoggingInterceptor({
-        logLevel: 'debug',
+        logLevel: "debug",
         enableConsoleHijacking: false,
       });
-      expect(iquriLogger.level).toBe('debug');
+      expect(iquriLogger.level).toBe("debug");
     });
   });
 
-  describe('intercept', () => {
+  describe("intercept", () => {
     beforeEach(() => {
       interceptor = new LoggingInterceptor({
-        serviceName: 'test-service',
+        serviceName: "test-service",
         enableConsoleHijacking: false,
       });
     });
 
-    it('should return observable', (done) => {
+    it("should return observable", (done) => {
       const result = interceptor.intercept(
         mockExecutionContext as ExecutionContext,
         mockCallHandler as CallHandler,
@@ -101,47 +110,56 @@ describe('LoggingInterceptor', () => {
       expect(result).toBeDefined();
       result.subscribe({
         next: (value) => {
-          expect(value).toEqual({ data: 'test' });
+          expect(value).toEqual({ data: "test" });
         },
         complete: () => done(),
       });
     });
 
-    it('should generate traceId if not provided', (done) => {
+    it("should generate traceId if not provided", (done) => {
       interceptor
-        .intercept(mockExecutionContext as ExecutionContext, mockCallHandler as CallHandler)
+        .intercept(
+          mockExecutionContext as ExecutionContext,
+          mockCallHandler as CallHandler,
+        )
         .subscribe({
           complete: () => {
-            expect(mockRequest['traceId']).toBeDefined();
-            expect(typeof mockRequest['traceId']).toBe('string');
+            expect(mockRequest["traceId"]).toBeDefined();
+            expect(typeof mockRequest["traceId"]).toBe("string");
             done();
           },
         });
     });
 
-    it('should use existing traceId from headers', (done) => {
-      mockRequest['headers'] = {
-        'x-trace-id': 'existing-trace-id',
-        'user-agent': 'test-agent',
+    it("should use existing traceId from headers", (done) => {
+      mockRequest["headers"] = {
+        "x-trace-id": "existing-trace-id",
+        "user-agent": "test-agent",
       };
 
       interceptor
-        .intercept(mockExecutionContext as ExecutionContext, mockCallHandler as CallHandler)
+        .intercept(
+          mockExecutionContext as ExecutionContext,
+          mockCallHandler as CallHandler,
+        )
         .subscribe({
           complete: () => {
-            expect(mockRequest['traceId']).toBe('existing-trace-id');
+            expect(mockRequest["traceId"]).toBe("existing-trace-id");
             done();
           },
         });
     });
 
-    it('should set traceId in response header', (done) => {
+    it("should set traceId in response header", (done) => {
       interceptor
-        .intercept(mockExecutionContext as ExecutionContext, mockCallHandler as CallHandler)
+        .intercept(
+          mockExecutionContext as ExecutionContext,
+          mockCallHandler as CallHandler,
+        )
         .subscribe({
           complete: () => {
-            expect(mockResponse['setHeader']).toHaveBeenCalledWith(
-              'x-trace-id',
+            expect(mockResponse["setHeader"]).toHaveBeenCalledWith(
+              "x-trace-id",
               expect.any(String),
             );
             done();
@@ -149,28 +167,34 @@ describe('LoggingInterceptor', () => {
         });
     });
 
-    it('should set serviceName on request', (done) => {
+    it("should set serviceName on request", (done) => {
       interceptor
-        .intercept(mockExecutionContext as ExecutionContext, mockCallHandler as CallHandler)
+        .intercept(
+          mockExecutionContext as ExecutionContext,
+          mockCallHandler as CallHandler,
+        )
         .subscribe({
           complete: () => {
-            expect(mockRequest['serviceName']).toBe('test-service');
+            expect(mockRequest["serviceName"]).toBe("test-service");
             done();
           },
         });
     });
 
-    it('should log access when enabled', (done) => {
-      const infoSpy = jest.spyOn(iquriLogger, 'info').mockImplementation();
+    it("should log access when enabled", (done) => {
+      const infoSpy = jest.spyOn(iquriLogger, "info").mockImplementation();
 
       interceptor
-        .intercept(mockExecutionContext as ExecutionContext, mockCallHandler as CallHandler)
+        .intercept(
+          mockExecutionContext as ExecutionContext,
+          mockCallHandler as CallHandler,
+        )
         .subscribe({
           complete: () => {
             expect(infoSpy).toHaveBeenCalledWith(
               expect.objectContaining({
-                method: 'GET',
-                url: '/api/test',
+                method: "GET",
+                url: "/api/test",
                 statusCode: 200,
               }),
             );
@@ -179,15 +203,18 @@ describe('LoggingInterceptor', () => {
         });
     });
 
-    it('should not log when access log disabled', (done) => {
+    it("should not log when access log disabled", (done) => {
       interceptor = new LoggingInterceptor({
         enableAccessLog: false,
         enableConsoleHijacking: false,
       });
-      const infoSpy = jest.spyOn(iquriLogger, 'info').mockImplementation();
+      const infoSpy = jest.spyOn(iquriLogger, "info").mockImplementation();
 
       interceptor
-        .intercept(mockExecutionContext as ExecutionContext, mockCallHandler as CallHandler)
+        .intercept(
+          mockExecutionContext as ExecutionContext,
+          mockCallHandler as CallHandler,
+        )
         .subscribe({
           complete: () => {
             expect(infoSpy).not.toHaveBeenCalled();
@@ -196,15 +223,18 @@ describe('LoggingInterceptor', () => {
         });
     });
 
-    it('should skip logging for skipPaths', (done) => {
+    it("should skip logging for skipPaths", (done) => {
       interceptor = new LoggingInterceptor({
-        skipPaths: ['/health', '/api/test'],
+        skipPaths: ["/health", "/api/test"],
         enableConsoleHijacking: false,
       });
-      const infoSpy = jest.spyOn(iquriLogger, 'info').mockImplementation();
+      const infoSpy = jest.spyOn(iquriLogger, "info").mockImplementation();
 
       interceptor
-        .intercept(mockExecutionContext as ExecutionContext, mockCallHandler as CallHandler)
+        .intercept(
+          mockExecutionContext as ExecutionContext,
+          mockCallHandler as CallHandler,
+        )
         .subscribe({
           complete: () => {
             expect(infoSpy).not.toHaveBeenCalled();
@@ -213,11 +243,14 @@ describe('LoggingInterceptor', () => {
         });
     });
 
-    it('should include duration in log', (done) => {
-      const infoSpy = jest.spyOn(iquriLogger, 'info').mockImplementation();
+    it("should include duration in log", (done) => {
+      const infoSpy = jest.spyOn(iquriLogger, "info").mockImplementation();
 
       interceptor
-        .intercept(mockExecutionContext as ExecutionContext, mockCallHandler as CallHandler)
+        .intercept(
+          mockExecutionContext as ExecutionContext,
+          mockCallHandler as CallHandler,
+        )
         .subscribe({
           complete: () => {
             expect(infoSpy).toHaveBeenCalledWith(
@@ -231,22 +264,25 @@ describe('LoggingInterceptor', () => {
     });
   });
 
-  describe('error handling', () => {
+  describe("error handling", () => {
     beforeEach(() => {
       interceptor = new LoggingInterceptor({
-        serviceName: 'test-service',
+        serviceName: "test-service",
         enableConsoleHijacking: false,
       });
     });
 
-    it('should log error for 5xx status', (done) => {
-      const errorSpy = jest.spyOn(iquriLogger, 'error').mockImplementation();
+    it("should log error for 5xx status", (done) => {
+      const errorSpy = jest.spyOn(iquriLogger, "error").mockImplementation();
       mockCallHandler.handle = jest
         .fn()
-        .mockReturnValue(throwError(() => new Error('Internal error')));
+        .mockReturnValue(throwError(() => new Error("Internal error")));
 
       interceptor
-        .intercept(mockExecutionContext as ExecutionContext, mockCallHandler as CallHandler)
+        .intercept(
+          mockExecutionContext as ExecutionContext,
+          mockCallHandler as CallHandler,
+        )
         .subscribe({
           error: () => {
             expect(errorSpy).toHaveBeenCalled();
@@ -255,14 +291,21 @@ describe('LoggingInterceptor', () => {
         });
     });
 
-    it('should log warning for 4xx status', (done) => {
-      const warnSpy = jest.spyOn(iquriLogger, 'warn').mockImplementation();
+    it("should log warning for 4xx status", (done) => {
+      const warnSpy = jest.spyOn(iquriLogger, "warn").mockImplementation();
       mockCallHandler.handle = jest
         .fn()
-        .mockReturnValue(throwError(() => new HttpException('Not Found', HttpStatus.NOT_FOUND)));
+        .mockReturnValue(
+          throwError(
+            () => new HttpException("Not Found", HttpStatus.NOT_FOUND),
+          ),
+        );
 
       interceptor
-        .intercept(mockExecutionContext as ExecutionContext, mockCallHandler as CallHandler)
+        .intercept(
+          mockExecutionContext as ExecutionContext,
+          mockCallHandler as CallHandler,
+        )
         .subscribe({
           error: () => {
             expect(warnSpy).toHaveBeenCalled();
@@ -271,19 +314,22 @@ describe('LoggingInterceptor', () => {
         });
     });
 
-    it('should include error message in log', (done) => {
-      const errorSpy = jest.spyOn(iquriLogger, 'error').mockImplementation();
+    it("should include error message in log", (done) => {
+      const errorSpy = jest.spyOn(iquriLogger, "error").mockImplementation();
       mockCallHandler.handle = jest
         .fn()
-        .mockReturnValue(throwError(() => new Error('Test error message')));
+        .mockReturnValue(throwError(() => new Error("Test error message")));
 
       interceptor
-        .intercept(mockExecutionContext as ExecutionContext, mockCallHandler as CallHandler)
+        .intercept(
+          mockExecutionContext as ExecutionContext,
+          mockCallHandler as CallHandler,
+        )
         .subscribe({
           error: () => {
             expect(errorSpy).toHaveBeenCalledWith(
               expect.objectContaining({
-                error: 'Test error message',
+                error: "Test error message",
               }),
             );
             done();
@@ -291,13 +337,18 @@ describe('LoggingInterceptor', () => {
         });
     });
 
-    it('should rethrow the error', (done) => {
-      jest.spyOn(iquriLogger, 'error').mockImplementation();
-      const testError = new Error('Test error');
-      mockCallHandler.handle = jest.fn().mockReturnValue(throwError(() => testError));
+    it("should rethrow the error", (done) => {
+      jest.spyOn(iquriLogger, "error").mockImplementation();
+      const testError = new Error("Test error");
+      mockCallHandler.handle = jest
+        .fn()
+        .mockReturnValue(throwError(() => testError));
 
       interceptor
-        .intercept(mockExecutionContext as ExecutionContext, mockCallHandler as CallHandler)
+        .intercept(
+          mockExecutionContext as ExecutionContext,
+          mockCallHandler as CallHandler,
+        )
         .subscribe({
           error: (err) => {
             expect(err).toBe(testError);
@@ -307,26 +358,29 @@ describe('LoggingInterceptor', () => {
     });
   });
 
-  describe('Edge Cases', () => {
+  describe("Edge Cases", () => {
     beforeEach(() => {
       interceptor = new LoggingInterceptor({
-        serviceName: 'test-service',
+        serviceName: "test-service",
         enableConsoleHijacking: false,
       });
     });
 
-    it('should fallback to url when originalUrl is not set', (done) => {
-      mockRequest['originalUrl'] = undefined;
-      mockRequest['url'] = '/fallback-url';
-      const infoSpy = jest.spyOn(iquriLogger, 'info').mockImplementation();
+    it("should fallback to url when originalUrl is not set", (done) => {
+      mockRequest["originalUrl"] = undefined;
+      mockRequest["url"] = "/fallback-url";
+      const infoSpy = jest.spyOn(iquriLogger, "info").mockImplementation();
 
       interceptor
-        .intercept(mockExecutionContext as ExecutionContext, mockCallHandler as CallHandler)
+        .intercept(
+          mockExecutionContext as ExecutionContext,
+          mockCallHandler as CallHandler,
+        )
         .subscribe({
           complete: () => {
             expect(infoSpy).toHaveBeenCalledWith(
               expect.objectContaining({
-                url: '/fallback-url',
+                url: "/fallback-url",
               }),
             );
             done();
@@ -334,18 +388,21 @@ describe('LoggingInterceptor', () => {
         });
     });
 
-    it('should fallback to socket.remoteAddress when ip is not set', (done) => {
-      mockRequest['ip'] = undefined;
-      mockRequest['socket'] = { remoteAddress: '192.168.1.1' };
-      const infoSpy = jest.spyOn(iquriLogger, 'info').mockImplementation();
+    it("should fallback to socket.remoteAddress when ip is not set", (done) => {
+      mockRequest["ip"] = undefined;
+      mockRequest["socket"] = { remoteAddress: "192.168.1.1" };
+      const infoSpy = jest.spyOn(iquriLogger, "info").mockImplementation();
 
       interceptor
-        .intercept(mockExecutionContext as ExecutionContext, mockCallHandler as CallHandler)
+        .intercept(
+          mockExecutionContext as ExecutionContext,
+          mockCallHandler as CallHandler,
+        )
         .subscribe({
           complete: () => {
             expect(infoSpy).toHaveBeenCalledWith(
               expect.objectContaining({
-                ip: '192.168.1.1',
+                ip: "192.168.1.1",
               }),
             );
             done();
@@ -353,18 +410,21 @@ describe('LoggingInterceptor', () => {
         });
     });
 
-    it('should fallback to empty string when no ip or socket', (done) => {
-      mockRequest['ip'] = undefined;
-      mockRequest['socket'] = undefined;
-      const infoSpy = jest.spyOn(iquriLogger, 'info').mockImplementation();
+    it("should fallback to empty string when no ip or socket", (done) => {
+      mockRequest["ip"] = undefined;
+      mockRequest["socket"] = undefined;
+      const infoSpy = jest.spyOn(iquriLogger, "info").mockImplementation();
 
       interceptor
-        .intercept(mockExecutionContext as ExecutionContext, mockCallHandler as CallHandler)
+        .intercept(
+          mockExecutionContext as ExecutionContext,
+          mockCallHandler as CallHandler,
+        )
         .subscribe({
           complete: () => {
             expect(infoSpy).toHaveBeenCalledWith(
               expect.objectContaining({
-                ip: '',
+                ip: "",
               }),
             );
             done();
@@ -372,18 +432,21 @@ describe('LoggingInterceptor', () => {
         });
     });
 
-    it('should fallback to empty string when socket has no remoteAddress', (done) => {
-      mockRequest['ip'] = undefined;
-      mockRequest['socket'] = {};
-      const infoSpy = jest.spyOn(iquriLogger, 'info').mockImplementation();
+    it("should fallback to empty string when socket has no remoteAddress", (done) => {
+      mockRequest["ip"] = undefined;
+      mockRequest["socket"] = {};
+      const infoSpy = jest.spyOn(iquriLogger, "info").mockImplementation();
 
       interceptor
-        .intercept(mockExecutionContext as ExecutionContext, mockCallHandler as CallHandler)
+        .intercept(
+          mockExecutionContext as ExecutionContext,
+          mockCallHandler as CallHandler,
+        )
         .subscribe({
           complete: () => {
             expect(infoSpy).toHaveBeenCalledWith(
               expect.objectContaining({
-                ip: '',
+                ip: "",
               }),
             );
             done();
@@ -391,17 +454,20 @@ describe('LoggingInterceptor', () => {
         });
     });
 
-    it('should fallback to empty string when user-agent header is not set', (done) => {
-      mockRequest['headers'] = {};
-      const infoSpy = jest.spyOn(iquriLogger, 'info').mockImplementation();
+    it("should fallback to empty string when user-agent header is not set", (done) => {
+      mockRequest["headers"] = {};
+      const infoSpy = jest.spyOn(iquriLogger, "info").mockImplementation();
 
       interceptor
-        .intercept(mockExecutionContext as ExecutionContext, mockCallHandler as CallHandler)
+        .intercept(
+          mockExecutionContext as ExecutionContext,
+          mockCallHandler as CallHandler,
+        )
         .subscribe({
           complete: () => {
             expect(infoSpy).toHaveBeenCalledWith(
               expect.objectContaining({
-                userAgent: '',
+                userAgent: "",
               }),
             );
             done();
@@ -409,12 +475,15 @@ describe('LoggingInterceptor', () => {
         });
     });
 
-    it('should fallback to 200 when statusCode is not set', (done) => {
-      mockResponse['statusCode'] = undefined;
-      const infoSpy = jest.spyOn(iquriLogger, 'info').mockImplementation();
+    it("should fallback to 200 when statusCode is not set", (done) => {
+      mockResponse["statusCode"] = undefined;
+      const infoSpy = jest.spyOn(iquriLogger, "info").mockImplementation();
 
       interceptor
-        .intercept(mockExecutionContext as ExecutionContext, mockCallHandler as CallHandler)
+        .intercept(
+          mockExecutionContext as ExecutionContext,
+          mockCallHandler as CallHandler,
+        )
         .subscribe({
           complete: () => {
             expect(infoSpy).toHaveBeenCalledWith(
@@ -427,19 +496,24 @@ describe('LoggingInterceptor', () => {
         });
     });
 
-    it('should handle ip fallback in error case', (done) => {
-      mockRequest['ip'] = undefined;
-      mockRequest['socket'] = { remoteAddress: '10.0.0.1' };
-      const errorSpy = jest.spyOn(iquriLogger, 'error').mockImplementation();
-      mockCallHandler.handle = jest.fn().mockReturnValue(throwError(() => new Error('test')));
+    it("should handle ip fallback in error case", (done) => {
+      mockRequest["ip"] = undefined;
+      mockRequest["socket"] = { remoteAddress: "10.0.0.1" };
+      const errorSpy = jest.spyOn(iquriLogger, "error").mockImplementation();
+      mockCallHandler.handle = jest
+        .fn()
+        .mockReturnValue(throwError(() => new Error("test")));
 
       interceptor
-        .intercept(mockExecutionContext as ExecutionContext, mockCallHandler as CallHandler)
+        .intercept(
+          mockExecutionContext as ExecutionContext,
+          mockCallHandler as CallHandler,
+        )
         .subscribe({
           error: () => {
             expect(errorSpy).toHaveBeenCalledWith(
               expect.objectContaining({
-                ip: '10.0.0.1',
+                ip: "10.0.0.1",
               }),
             );
             done();
@@ -447,19 +521,24 @@ describe('LoggingInterceptor', () => {
         });
     });
 
-    it('should handle empty ip and socket in error case', (done) => {
-      mockRequest['ip'] = undefined;
-      mockRequest['socket'] = undefined;
-      const errorSpy = jest.spyOn(iquriLogger, 'error').mockImplementation();
-      mockCallHandler.handle = jest.fn().mockReturnValue(throwError(() => new Error('test')));
+    it("should handle empty ip and socket in error case", (done) => {
+      mockRequest["ip"] = undefined;
+      mockRequest["socket"] = undefined;
+      const errorSpy = jest.spyOn(iquriLogger, "error").mockImplementation();
+      mockCallHandler.handle = jest
+        .fn()
+        .mockReturnValue(throwError(() => new Error("test")));
 
       interceptor
-        .intercept(mockExecutionContext as ExecutionContext, mockCallHandler as CallHandler)
+        .intercept(
+          mockExecutionContext as ExecutionContext,
+          mockCallHandler as CallHandler,
+        )
         .subscribe({
           error: () => {
             expect(errorSpy).toHaveBeenCalledWith(
               expect.objectContaining({
-                ip: '',
+                ip: "",
               }),
             );
             done();

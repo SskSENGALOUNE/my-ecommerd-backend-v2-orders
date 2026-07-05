@@ -1,10 +1,10 @@
-import { QueryHandler, IQueryHandler } from '@nestjs/cqrs';
-import { Inject } from '@nestjs/common';
-import { GetAllOrdersQuery } from './get-all-orders.query';
-import type { IOrderRepository } from '../../../domain/order/order.repository';
-import { ORDER_REPOSITORY } from '../../../domain/order/order.repository';
-import type { PaginatedResult } from '../../../domain/order/order.repository';
-import type { Order } from '../../../domain/order/order.entity';
+import { QueryHandler, IQueryHandler } from "@nestjs/cqrs";
+import { Inject } from "@nestjs/common";
+import { GetAllOrdersQuery } from "./get-all-orders.query";
+import type { IOrderRepository } from "../../../domain/order/order.repository";
+import { ORDER_REPOSITORY } from "../../../domain/order/order.repository";
+import type { PaginatedResult } from "../../../domain/order/order.repository";
+import type { Order } from "../../../domain/order/order.entity";
 
 @QueryHandler(GetAllOrdersQuery)
 export class GetAllOrdersHandler implements IQueryHandler<GetAllOrdersQuery> {

@@ -1,6 +1,6 @@
-import { LoggerService } from '@nestjs/common';
-import { iquriLogger } from './logger';
-import { getTraceId, getServiceName } from './utils/als';
+import { LoggerService } from "@nestjs/common";
+import { iquriLogger } from "./logger";
+import { getTraceId, getServiceName } from "./utils/als";
 
 interface FormattedMessage {
   message: string;
@@ -22,7 +22,8 @@ export class IquriNestLogger implements LoggerService {
     const serviceName = getServiceName();
 
     return {
-      message: typeof message === 'object' ? JSON.stringify(message) : String(message),
+      message:
+        typeof message === "object" ? JSON.stringify(message) : String(message),
       context: context || this.context,
       ...(traceId ? { traceId } : {}),
       ...(serviceName ? { serviceName } : {}),

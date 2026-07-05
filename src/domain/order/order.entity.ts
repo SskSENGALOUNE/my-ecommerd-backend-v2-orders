@@ -1,8 +1,8 @@
-import { randomUUID } from 'crypto';
-import { DomainValidationException } from '../exceptions';
-import { BusinessRuleViolationException } from '../exceptions';
-import { OrderItem } from './order-item.entity';
-import { OrderStatus, ORDER_STATUS_TRANSITIONS } from './order-status.enum';
+import { randomUUID } from "crypto";
+import { DomainValidationException } from "../exceptions";
+import { BusinessRuleViolationException } from "../exceptions";
+import { OrderItem } from "./order-item.entity";
+import { OrderStatus, ORDER_STATUS_TRANSITIONS } from "./order-status.enum";
 
 export interface OrderProps {
   id: string;
@@ -82,14 +82,14 @@ export class Order {
     createdBy: string;
   }): Order {
     if (!input.customerId?.trim()) {
-      throw new DomainValidationException('Order requires a customerId');
+      throw new DomainValidationException("Order requires a customerId");
     }
     if (!input.shippingAddress?.trim()) {
-      throw new DomainValidationException('Order requires a shippingAddress');
+      throw new DomainValidationException("Order requires a shippingAddress");
     }
     if (!input.items || input.items.length === 0) {
       throw new DomainValidationException(
-        'Order must contain at least one item',
+        "Order must contain at least one item",
       );
     }
 
@@ -135,12 +135,12 @@ export class Order {
   updateShippingAddress(shippingAddress: string, updatedBy: string): void {
     if (this.props.status !== OrderStatus.PENDING) {
       throw new BusinessRuleViolationException(
-        'Shipping address can only be changed while the order is PENDING',
+        "Shipping address can only be changed while the order is PENDING",
       );
     }
-    const trimmed = shippingAddress?.trim() ?? '';
+    const trimmed = shippingAddress?.trim() ?? "";
     if (trimmed.length === 0) {
-      throw new DomainValidationException('shippingAddress must not be empty');
+      throw new DomainValidationException("shippingAddress must not be empty");
     }
     this.props.shippingAddress = trimmed;
     this.touch(updatedBy);
@@ -153,7 +153,7 @@ export class Order {
 
   private static generateOrderNumber(): string {
     const now = new Date();
-    const stamp = now.toISOString().slice(0, 10).replace(/-/g, '');
+    const stamp = now.toISOString().slice(0, 10).replace(/-/g, "");
     const rand = randomUUID().slice(0, 8).toUpperCase();
     return `ORD-${stamp}-${rand}`;
   }

@@ -3,7 +3,7 @@ export interface LoggerOptions {
   enableAccessLog?: boolean;
   enableConsoleHijacking?: boolean;
   skipPaths?: string[];
-  logLevel?: 'debug' | 'info' | 'warn' | 'error';
+  logLevel?: "debug" | "info" | "warn" | "error";
 }
 
 // Extended Request with traceId and serviceName
@@ -17,8 +17,8 @@ export interface TracedRequest {
   ip?: string;
   socket?: { remoteAddress?: string };
   headers: Record<string, string | string[] | undefined> & {
-    'x-trace-id'?: string;
-    'user-agent'?: string;
+    "x-trace-id"?: string;
+    "user-agent"?: string;
   };
 }
 

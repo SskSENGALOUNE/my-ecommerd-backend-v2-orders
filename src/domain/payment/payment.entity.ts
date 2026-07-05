@@ -1,8 +1,11 @@
-import { randomUUID } from 'crypto';
-import { DomainValidationException } from '../exceptions';
-import { BusinessRuleViolationException } from '../exceptions';
-import { PaymentStatus, PAYMENT_STATUS_TRANSITIONS } from './payment-status.enum';
-import { PaymentMethod } from './payment-method.enum';
+import { randomUUID } from "crypto";
+import { DomainValidationException } from "../exceptions";
+import { BusinessRuleViolationException } from "../exceptions";
+import {
+  PaymentStatus,
+  PAYMENT_STATUS_TRANSITIONS,
+} from "./payment-status.enum";
+import { PaymentMethod } from "./payment-method.enum";
 
 export interface PaymentProps {
   id: string;
@@ -60,11 +63,11 @@ export class Payment {
     method: PaymentMethod;
   }): Payment {
     if (!input.orderId?.trim()) {
-      throw new DomainValidationException('Payment requires an orderId');
+      throw new DomainValidationException("Payment requires an orderId");
     }
-    if (typeof input.amount !== 'number' || input.amount <= 0) {
+    if (typeof input.amount !== "number" || input.amount <= 0) {
       throw new DomainValidationException(
-        'Payment amount must be a positive number',
+        "Payment amount must be a positive number",
       );
     }
     const now = new Date();
@@ -88,7 +91,7 @@ export class Payment {
   complete(transactionRef: string): void {
     if (!transactionRef?.trim()) {
       throw new DomainValidationException(
-        'A transactionRef is required to complete a payment',
+        "A transactionRef is required to complete a payment",
       );
     }
     this.transitionTo(PaymentStatus.COMPLETED);

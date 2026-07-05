@@ -1,14 +1,12 @@
-import { QueryHandler, IQueryHandler } from '@nestjs/cqrs';
-import { Inject } from '@nestjs/common';
-import { GetCartByCustomerQuery } from './get-cart-by-customer.query';
-import type { ICartRepository } from '../../../domain/cart/cart.repository';
-import { CART_REPOSITORY } from '../../../domain/cart/cart.repository';
-import { Cart } from '../../../domain/cart/cart.entity';
+import { QueryHandler, IQueryHandler } from "@nestjs/cqrs";
+import { Inject } from "@nestjs/common";
+import { GetCartByCustomerQuery } from "./get-cart-by-customer.query";
+import type { ICartRepository } from "../../../domain/cart/cart.repository";
+import { CART_REPOSITORY } from "../../../domain/cart/cart.repository";
+import { Cart } from "../../../domain/cart/cart.entity";
 
 @QueryHandler(GetCartByCustomerQuery)
-export class GetCartByCustomerHandler
-  implements IQueryHandler<GetCartByCustomerQuery>
-{
+export class GetCartByCustomerHandler implements IQueryHandler<GetCartByCustomerQuery> {
   constructor(
     @Inject(CART_REPOSITORY)
     private readonly repository: ICartRepository,

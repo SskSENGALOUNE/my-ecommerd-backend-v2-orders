@@ -1,16 +1,16 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { Order } from '../../../domain/order/order.entity';
-import { OrderItem } from '../../../domain/order/order-item.entity';
-import { OrderStatus } from '../../../domain/order/order-status.enum';
+import { ApiProperty } from "@nestjs/swagger";
+import { Order } from "../../../domain/order/order.entity";
+import { OrderItem } from "../../../domain/order/order-item.entity";
+import { OrderStatus } from "../../../domain/order/order-status.enum";
 
 export class OrderItemResponseDto {
-  @ApiProperty({ example: '123e4567-e89b-12d3-a456-426614174000' })
+  @ApiProperty({ example: "123e4567-e89b-12d3-a456-426614174000" })
   id: string;
 
-  @ApiProperty({ example: 'prod-123' })
+  @ApiProperty({ example: "prod-123" })
   productId: string;
 
-  @ApiProperty({ example: 'Wireless Mouse' })
+  @ApiProperty({ example: "Wireless Mouse" })
   productName: string;
 
   @ApiProperty({ example: 29.99 })
@@ -35,13 +35,13 @@ export class OrderItemResponseDto {
 }
 
 export class OrderResponseDto {
-  @ApiProperty({ example: '123e4567-e89b-12d3-a456-426614174000' })
+  @ApiProperty({ example: "123e4567-e89b-12d3-a456-426614174000" })
   id: string;
 
-  @ApiProperty({ example: 'ORD-20260625-ABCD1234' })
+  @ApiProperty({ example: "ORD-20260625-ABCD1234" })
   orderNumber: string;
 
-  @ApiProperty({ example: 'cust-123' })
+  @ApiProperty({ example: "cust-123" })
   customerId: string;
 
   @ApiProperty({ enum: OrderStatus, example: OrderStatus.PENDING })
@@ -50,22 +50,22 @@ export class OrderResponseDto {
   @ApiProperty({ example: 59.98 })
   totalAmount: number;
 
-  @ApiProperty({ example: '123 Main St, Vientiane, Laos' })
+  @ApiProperty({ example: "123 Main St, Vientiane, Laos" })
   shippingAddress: string;
 
   @ApiProperty({ type: [OrderItemResponseDto] })
   items: OrderItemResponseDto[];
 
-  @ApiProperty({ example: '2026-06-25T10:30:00.000Z' })
+  @ApiProperty({ example: "2026-06-25T10:30:00.000Z" })
   createdAt: Date;
 
-  @ApiProperty({ example: 'user-123' })
+  @ApiProperty({ example: "user-123" })
   createdBy: string;
 
-  @ApiProperty({ example: '2026-06-25T12:45:00.000Z' })
+  @ApiProperty({ example: "2026-06-25T12:45:00.000Z" })
   updatedAt: Date;
 
-  @ApiProperty({ example: 'user-456' })
+  @ApiProperty({ example: "user-456" })
   updatedBy: string;
 
   static fromDomain(entity: Order): OrderResponseDto {

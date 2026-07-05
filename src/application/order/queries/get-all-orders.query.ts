@@ -3,7 +3,7 @@ export class GetAllOrdersQuery {
     public readonly page: number,
     public readonly limit: number,
     public readonly sortBy?: string,
-    public readonly sortOrder: 'asc' | 'desc' = 'desc',
+    public readonly sortOrder: "asc" | "desc" = "desc",
     public readonly customerId?: string,
   ) {}
 

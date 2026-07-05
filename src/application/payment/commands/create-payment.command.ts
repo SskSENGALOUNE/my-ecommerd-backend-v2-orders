@@ -1,4 +1,4 @@
-import { PaymentMethod } from '../../../domain/payment/payment-method.enum';
+import { PaymentMethod } from "../../../domain/payment/payment-method.enum";
 
 export class CreatePaymentCommand {
   constructor(

@@ -1,4 +1,4 @@
-import { DomainErrorCode, DomainException } from './domain.exception';
+import { DomainErrorCode, DomainException } from "./domain.exception";
 
 export class DomainValidationException extends DomainException {
   readonly code = DomainErrorCode.VALIDATION;

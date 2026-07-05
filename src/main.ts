@@ -1,26 +1,26 @@
-import { config as dotenvConfig } from 'dotenv';
-import { resolve } from 'path';
+import { config as dotenvConfig } from "dotenv";
+import { resolve } from "path";
 
 // Load .env FIRST before any other imports that might read process.env
-dotenvConfig({ path: resolve(__dirname, '..', '.env'), override: true });
+dotenvConfig({ path: resolve(__dirname, "..", ".env"), override: true });
 
-import { NestFactory } from '@nestjs/core';
-import { ConfigService } from '@nestjs/config';
-import { ValidationPipe, VersioningType } from '@nestjs/common';
-import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
-import helmet from 'helmet';
-import compression from 'compression';
-import { json, urlencoded } from 'express';
-import { AppModule } from './app.module';
-import { LoggingInterceptor } from './utilities/interceptor/logger';
-import { BaseResponseInterceptor } from './presentation/interceptors/base-response.interceptor';
-import { GlobalExceptionFilter } from './presentation/filters/global-exception.filter';
-import type { AppConfig } from './config/app.config';
+import { NestFactory } from "@nestjs/core";
+import { ConfigService } from "@nestjs/config";
+import { ValidationPipe, VersioningType } from "@nestjs/common";
+import { SwaggerModule, DocumentBuilder } from "@nestjs/swagger";
+import helmet from "helmet";
+import compression from "compression";
+import { json, urlencoded } from "express";
+import { AppModule } from "./app.module";
+import { LoggingInterceptor } from "./utilities/interceptor/logger";
+import { BaseResponseInterceptor } from "./presentation/interceptors/base-response.interceptor";
+import { GlobalExceptionFilter } from "./presentation/filters/global-exception.filter";
+import type { AppConfig } from "./config/app.config";
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { bufferLogs: true });
   const config = app.get(ConfigService);
-  const appCfg = config.get<AppConfig>('app')!;
+  const appCfg = config.get<AppConfig>("app")!;
 
   // ───── Security & infrastructure middleware ─────
   app.use(helmet());
@@ -29,15 +29,15 @@ async function bootstrap() {
   app.use(urlencoded({ extended: true, limit: appCfg.bodyLimit }));
 
   app.enableCors({
-    origin: appCfg.corsOrigins.includes('*') ? true : appCfg.corsOrigins,
+    origin: appCfg.corsOrigins.includes("*") ? true : appCfg.corsOrigins,
     credentials: true,
   });
 
   // ───── API surface ─────
-  app.setGlobalPrefix('api');
+  app.setGlobalPrefix("api");
   app.enableVersioning({
     type: VersioningType.URI,
-    defaultVersion: '1',
+    defaultVersion: "1",
   });
 
   // ───── Cross-cutting interceptors / filters / pipes ─────
@@ -60,20 +60,24 @@ async function bootstrap() {
 
   // ───── Swagger ─────
   const swaggerConfig = new DocumentBuilder()
-    .setTitle('Order Service API')
-    .setDescription('API documentation for the Order Service — cart, orders and payments (Clean Architecture + CQRS)')
-    .setVersion('1.0')
-    .addTag('health')
-    .addTag('carts')
-    .addTag('orders')
-    .addTag('payments')
+    .setTitle("Order Service API")
+    .setDescription(
+      "API documentation for the Order Service — cart, orders and payments (Clean Architecture + CQRS)",
+    )
+    .setVersion("1.0")
+    .addTag("health")
+    .addTag("carts")
+    .addTag("orders")
+    .addTag("payments")
     .build();
   const document = SwaggerModule.createDocument(app, swaggerConfig);
-  SwaggerModule.setup('docs', app, document);
+  SwaggerModule.setup("docs", app, document);
 
   await app.listen(appCfg.port);
 
-  console.log(`Application running on:  http://localhost:${appCfg.port}/api/v1`);
+  console.log(
+    `Application running on:  http://localhost:${appCfg.port}/api/v1`,
+  );
   console.log(`Swagger documentation:   http://localhost:${appCfg.port}/docs`);
 }
 

@@ -1,4 +1,4 @@
-import { Global, Module } from '@nestjs/common';
+import { Global, Module } from "@nestjs/common";
 
 /**
  * Global module for cross-cutting providers shared across feature modules.

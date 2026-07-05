@@ -1,4 +1,4 @@
-import { OrderStatus } from '../../../domain/order/order-status.enum';
+import { OrderStatus } from "../../../domain/order/order-status.enum";
 
 export class UpdateOrderStatusCommand {
   constructor(

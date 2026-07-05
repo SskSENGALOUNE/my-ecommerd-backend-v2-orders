@@ -1,4 +1,4 @@
-import { Payment } from './payment.entity';
+import { Payment } from "./payment.entity";
 
 /** Domain port for the Payment entity. */
 export interface IPaymentRepository {
@@ -8,4 +8,4 @@ export interface IPaymentRepository {
   save(entity: Payment): Promise<Payment>;
 }
 
-export const PAYMENT_REPOSITORY = Symbol('PAYMENT_REPOSITORY');
+export const PAYMENT_REPOSITORY = Symbol("PAYMENT_REPOSITORY");

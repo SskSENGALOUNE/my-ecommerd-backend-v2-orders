@@ -1,5 +1,5 @@
-import { randomUUID } from 'crypto';
-import { DomainValidationException } from '../exceptions';
+import { randomUUID } from "crypto";
+import { DomainValidationException } from "../exceptions";
 
 export interface CartItemProps {
   id: string;
@@ -38,11 +38,11 @@ export class CartItem {
     quantity: number;
   }): CartItem {
     if (!input.productId?.trim()) {
-      throw new DomainValidationException('CartItem requires a productId');
+      throw new DomainValidationException("CartItem requires a productId");
     }
-    if (typeof input.unitPrice !== 'number' || input.unitPrice < 0) {
+    if (typeof input.unitPrice !== "number" || input.unitPrice < 0) {
       throw new DomainValidationException(
-        'CartItem unitPrice must be a non-negative number',
+        "CartItem unitPrice must be a non-negative number",
       );
     }
     return new CartItem({
@@ -62,9 +62,9 @@ export class CartItem {
   }
 
   changeUnitPrice(unitPrice: number): void {
-    if (typeof unitPrice !== 'number' || unitPrice < 0) {
+    if (typeof unitPrice !== "number" || unitPrice < 0) {
       throw new DomainValidationException(
-        'CartItem unitPrice must be a non-negative number',
+        "CartItem unitPrice must be a non-negative number",
       );
     }
     this.props.unitPrice = unitPrice;
@@ -73,7 +73,7 @@ export class CartItem {
   private static validateQuantity(quantity: number): number {
     if (!Number.isInteger(quantity) || quantity < 1) {
       throw new DomainValidationException(
-        'CartItem quantity must be a positive integer',
+        "CartItem quantity must be a positive integer",
       );
     }
     return quantity;

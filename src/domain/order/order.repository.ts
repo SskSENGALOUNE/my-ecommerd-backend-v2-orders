@@ -1,4 +1,4 @@
-import { Order } from './order.entity';
+import { Order } from "./order.entity";
 
 /**
  * Domain port: speaks the Order aggregate only. Infrastructure adapters are
@@ -17,7 +17,7 @@ export interface OrderQueryParams {
   skip: number;
   take: number;
   sortBy?: string;
-  sortOrder?: 'asc' | 'desc';
+  sortOrder?: "asc" | "desc";
   customerId?: string;
 }
 
@@ -26,4 +26,4 @@ export interface PaginatedResult<T> {
   total: number;
 }
 
-export const ORDER_REPOSITORY = Symbol('ORDER_REPOSITORY');
+export const ORDER_REPOSITORY = Symbol("ORDER_REPOSITORY");

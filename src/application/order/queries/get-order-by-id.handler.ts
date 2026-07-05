@@ -1,10 +1,10 @@
-import { QueryHandler, IQueryHandler } from '@nestjs/cqrs';
-import { Inject } from '@nestjs/common';
-import { GetOrderByIdQuery } from './get-order-by-id.query';
-import type { IOrderRepository } from '../../../domain/order/order.repository';
-import { ORDER_REPOSITORY } from '../../../domain/order/order.repository';
-import { Order } from '../../../domain/order/order.entity';
-import { NotFoundDomainException } from '../../../domain/exceptions';
+import { QueryHandler, IQueryHandler } from "@nestjs/cqrs";
+import { Inject } from "@nestjs/common";
+import { GetOrderByIdQuery } from "./get-order-by-id.query";
+import type { IOrderRepository } from "../../../domain/order/order.repository";
+import { ORDER_REPOSITORY } from "../../../domain/order/order.repository";
+import { Order } from "../../../domain/order/order.entity";
+import { NotFoundDomainException } from "../../../domain/exceptions";
 
 @QueryHandler(GetOrderByIdQuery)
 export class GetOrderByIdHandler implements IQueryHandler<GetOrderByIdQuery> {
@@ -17,7 +17,7 @@ export class GetOrderByIdHandler implements IQueryHandler<GetOrderByIdQuery> {
     const result = await this.repository.findById(query.id);
 
     if (!result) {
-      throw NotFoundDomainException.forResource('Order', query.id);
+      throw NotFoundDomainException.forResource("Order", query.id);
     }
 
     return result;

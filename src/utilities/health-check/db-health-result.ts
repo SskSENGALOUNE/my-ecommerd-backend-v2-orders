@@ -1,6 +1,6 @@
 export interface DbHealthResult {
   engine: string;
-  status: 'ok' | 'error';
+  status: "ok" | "error";
   permissions?: {
     select?: boolean;
     insert?: boolean;

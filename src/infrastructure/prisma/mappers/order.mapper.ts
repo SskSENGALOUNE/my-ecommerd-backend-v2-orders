@@ -2,10 +2,10 @@ import {
   Order as PrismaOrder,
   OrderItem as PrismaOrderItem,
   Prisma,
-} from '@prisma/client';
-import { Order } from '../../../domain/order/order.entity';
-import { OrderItem } from '../../../domain/order/order-item.entity';
-import { OrderStatus } from '../../../domain/order/order-status.enum';
+} from "@prisma/client";
+import { Order } from "../../../domain/order/order.entity";
+import { OrderItem } from "../../../domain/order/order-item.entity";
+import { OrderStatus } from "../../../domain/order/order-status.enum";
 
 type PrismaOrderWithItems = PrismaOrder & { items: PrismaOrderItem[] };
 

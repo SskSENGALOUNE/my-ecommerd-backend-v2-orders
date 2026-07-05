@@ -1,10 +1,10 @@
-import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { Inject } from '@nestjs/common';
-import { FailPaymentCommand } from './fail-payment.command';
-import type { IPaymentRepository } from '../../../domain/payment/payment.repository';
-import { PAYMENT_REPOSITORY } from '../../../domain/payment/payment.repository';
-import { Payment } from '../../../domain/payment/payment.entity';
-import { NotFoundDomainException } from '../../../domain/exceptions';
+import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
+import { Inject } from "@nestjs/common";
+import { FailPaymentCommand } from "./fail-payment.command";
+import type { IPaymentRepository } from "../../../domain/payment/payment.repository";
+import { PAYMENT_REPOSITORY } from "../../../domain/payment/payment.repository";
+import { Payment } from "../../../domain/payment/payment.entity";
+import { NotFoundDomainException } from "../../../domain/exceptions";
 
 @CommandHandler(FailPaymentCommand)
 export class FailPaymentHandler implements ICommandHandler<FailPaymentCommand> {
@@ -14,12 +14,10 @@ export class FailPaymentHandler implements ICommandHandler<FailPaymentCommand> {
   ) {}
 
   async execute(command: FailPaymentCommand): Promise<Payment> {
-    const payment = await this.paymentRepository.findByOrderId(
-      command.orderId,
-    );
+    const payment = await this.paymentRepository.findByOrderId(command.orderId);
     if (!payment) {
       throw NotFoundDomainException.forResource(
-        'Payment for order',
+        "Payment for order",
         command.orderId,
       );
     }
